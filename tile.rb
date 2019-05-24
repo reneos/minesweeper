@@ -1,6 +1,6 @@
 class Tile
 
-  attr_reader :revealed, :value, :neighbors
+  attr_reader :revealed, :value, :neighbors, :bombed
 
   def initialize(pos,bombs)
     @pos = pos
@@ -16,6 +16,10 @@ class Tile
     @revealed = true
   end
 
+  def empty?
+    return @value == "_"
+  end
+
   def set_value
     if @bombed
       @value = "B"
@@ -23,6 +27,7 @@ class Tile
       adjacent_bombs_num = self.bombs_adjacent
       if adjacent_bombs_num > 0
         @value = adjacent_bombs_num.to_s
+        @neighbors = [] # don't need to know neighbors for numbered tiles
       else
         @value = "_"
       end

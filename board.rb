@@ -2,19 +2,20 @@ require_relative './tile.rb'
 
 class Board
 
-  attr_reader :grid, :bombs, :size
+  attr_reader :grid, :bombs, :size, :game_over
 
   def initialize
     @size = 9
     @grid = Array.new(@size) {Array.new(@size)}
     @bombs = []
+    @game_over = false
     fill_in_bombs
     fill_in_tiles
     print_grid
   end
 
   def fill_in_bombs
-    num_bombs = @grid.flatten.length / 6
+    num_bombs = @grid.flatten.length / 8
     until num_bombs == 0
       row, col = rand(0...9), rand(0...9)
       if !@bombs.include?([row,col])
@@ -42,35 +43,21 @@ class Board
     @grid[row][col]
   end
 
-  def game_over?
-    @bombs.any? do |bomb_pos|
-      self[bomb_pos].revealed
-    end
-  end
-
   def cascade(tile)
-    if !(tile.revealed)
-      tile.reveal
-      if !(tile.neighbors.empty?)
-        neighbors = tile.neighbors.map{|neighbor| self[neighbor]}
-        neighbors.each do |neighbor|
-          if "12345678".include?(neighbor.value)
-            neighbor.reveal
-          else
-            cascade(neighbor)
-          end
-        end
-      end
+    neighbors = tile.neighbors.map{|neighbor| self[neighbor]}.reject(&:revealed)
+    neighbors.each do |neighbor_tile|
+      neighbor_tile.reveal
+      cascade(neighbor_tile) if neighbor_tile.empty? # only flip neighbors of "empty" tiles
     end
   end
 
   def reveal(pos)
     picked_tile = self[pos]
-    #If it's a bomb, stop there. If not, cascade.
-    if picked_tile.value != "B" && !"12345678".include?(picked_tile.value)
+    picked_tile.reveal
+    if picked_tile.bombed # If it's a bomb, game over.
+      @game_over = true
+    elsif picked_tile.empty? # If it's an empty tile, reveal it and its neighbors
       cascade(picked_tile)
-    else
-      picked_tile.reveal
     end
   end
 

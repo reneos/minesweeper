@@ -10,7 +10,7 @@ class Game
   end
 
   def run
-    until @board.game_over?
+    until @board.game_over
       pos = self.prompt
       @board.reveal(pos)
       @board.print_grid

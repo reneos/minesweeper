@@ -1,12 +1,12 @@
 require_relative './tile.rb'
-require 'pry'
 
 class Board
 
-  attr_reader :grid, :bombs
+  attr_reader :grid, :bombs, :size
 
   def initialize
-    @grid = Array.new(9) {Array.new(9)}
+    @size = 9
+    @grid = Array.new(@size) {Array.new(@size)}
     @bombs = []
     fill_in_bombs
     fill_in_tiles
@@ -37,8 +37,41 @@ class Board
     @grid.each {|row| puts row.join(" ") }
   end
 
+  def [](pos)
+    row, col = pos
+    @grid[row][col]
+  end
+
+  def game_over?
+    @bombs.any? do |bomb_pos|
+      self[bomb_pos].revealed
+    end
+  end
+
+  def cascade(tile)
+    if !(tile.revealed)
+      tile.reveal
+      if !(tile.neighbors.empty?)
+        neighbors = tile.neighbors.map{|neighbor| self[neighbor]}
+        neighbors.each do |neighbor|
+          if "12345678".include?(neighbor.value)
+            neighbor.reveal
+          else
+            cascade(neighbor)
+          end
+        end
+      end
+    end
+  end
+
+  def reveal(pos)
+    picked_tile = self[pos]
+    #If it's a bomb, stop there. If not, cascade.
+    if picked_tile.value != "B" && !"12345678".include?(picked_tile.value)
+      cascade(picked_tile)
+    else
+      picked_tile.reveal
+    end
+  end
+
 end
-
-board = Board.new
-
-pry

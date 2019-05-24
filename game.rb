@@ -1,4 +1,5 @@
 require_relative './board.rb'
+require 'colorize'
 require 'pry'
 
 class Game
@@ -15,6 +16,12 @@ class Game
       @board.reveal(pos)
       @board.print_grid
     end
+    if @board.win?
+      puts "You win!"
+    else
+      puts "You lose!"
+    end
+    @board.reveal_board
   end
 
   def prompt

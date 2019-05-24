@@ -52,11 +52,23 @@ class Tile
     adjacent_bombs_num
   end
 
+  def flag # toggle whether tile is flagged by user
+    @flagged = !@flagged
+  end
+
   def to_s
     if @revealed
-      @value
+      if @bombed
+        @value.colorize(:red)
+      elsif !self.empty?
+        @value.colorize(:light_blue)
+      else
+        @value
+      end
+    elsif @flagged
+      "^"
     else
-      "*"
+      @value
     end
   end
 

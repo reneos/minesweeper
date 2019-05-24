@@ -8,7 +8,7 @@ class Board
     @size = 9
     @grid = Array.new(@size) {Array.new(@size)}
     @bombs = []
-    @game_over = false
+    @lose = false
     fill_in_bombs
     fill_in_tiles
     print_grid
@@ -55,10 +55,27 @@ class Board
     picked_tile = self[pos]
     picked_tile.reveal
     if picked_tile.bombed # If it's a bomb, game over.
-      @game_over = true
+      @lose = true
     elsif picked_tile.empty? # If it's an empty tile, reveal it and its neighbors
       cascade(picked_tile)
     end
+  end
+
+  def win?
+    @grid.flatten.reject(&:bombed).all?(&:revealed)
+  end
+
+  def lose?
+    @lose
+  end
+
+  def game_over
+    win? || lose?
+  end
+
+  def reveal_board
+    @grid.each {|row| row.each(&:reveal) }
+    print_grid
   end
 
 end

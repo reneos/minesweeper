@@ -14,7 +14,7 @@ class Board
   end
 
   def fill_in_bombs
-    num_bombs = @grid.flatten.length / 4
+    num_bombs = @grid.flatten.length / 6
     until num_bombs == 0
       row, col = rand(0...9), rand(0...9)
       if !@bombs.include?([row,col])

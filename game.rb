@@ -1,8 +1,9 @@
 require_relative './board.rb'
 require 'pry'
-require 'tty'
-require 'remedy'
-include Remedy
+require 'tty-cursor'
+require 'tty-prompt'
+require 'colorize'
+
 
 class Game
 
@@ -12,24 +13,16 @@ class Game
     @board = Board.new
   end
 
-  def print_box(contents)
-    box = TTY::Box.frame(
-      width: 25,
-      height: 12,
-      title: {top_left: 'MINESWEEPER'},
-      border: :thick,
-      align: :center) do
-        contents
-      end
-    puts box
-  end
-
   def run
     @cursor = TTY::Cursor
+    cursor_pos = [0,0]
     until @board.game_over
       system("clear")
-      print_box(@board.print_grid)
-      mode, pos = self.prompt
+      # print_box(@board.print_grid)
+      @board.print_grid
+      print "Move around with arrow keys. Enter to flip tile, tab to flag tile."
+      mode, pos = self.prompt(cursor_pos)
+      cursor_pos = pos
       if mode == "r"
         @board.reveal(pos)
       else
@@ -46,15 +39,14 @@ class Game
     else
       message = "You lose!"
     end
-    print_box(@board.reveal_board)
+    @board.reveal_board
     puts message
   end
 
-  def prompt
+  def prompt(current_pos)
+    row, col = current_pos
     print @cursor.show
-    print @cursor.move_to(5,2)
-    row = 0
-    col = 0
+    print @cursor.move_to(col + col + 3, row + 1) # double col value to account for space printed in grid for readability
     while true
       prompt = TTY::Prompt::new(interrupt: :exit)
       prompt.on(:keypress) do |event|
@@ -67,7 +59,7 @@ class Game
           print @cursor.up(1)
           row -= 1
         elsif key == :left
-          print @cursor.backward(2)
+          print @cursor.backward(2) # move 2 spaces for lateral movement due to space printed in grid for readability
           col -= 1
         elsif key == :right
           print @cursor.forward(2)

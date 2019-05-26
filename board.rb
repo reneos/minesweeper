@@ -5,7 +5,7 @@ class Board
   attr_reader :grid, :bombs, :size, :game_over
 
   def initialize
-    @size = 9
+    @size = 15
     @grid = Array.new(@size) {Array.new(@size)}
     @bombs = []
     @lose = false
@@ -17,7 +17,7 @@ class Board
   def fill_in_bombs
     num_bombs = @grid.flatten.length / 8
     until num_bombs == 0
-      row, col = rand(0...9), rand(0...9)
+      row, col = rand(0...@size), rand(0...@size)
       if !@bombs.include?([row,col])
         @bombs << [row,col]
         num_bombs -= 1
@@ -29,18 +29,23 @@ class Board
     @grid.length.times do |row|
       @grid.length.times do |col|
         pos = [row,col]
-        @grid[row][col] = Tile.new(pos,@bombs)
+        @grid[row][col] = Tile.new(pos,@bombs,@size)
       end
     end
   end
 
   def print_grid
-    printed_grid = []
-    printed_grid << "  " + (0...9).to_a.join(" ")
-    @grid.each_with_index do |row, idx|
-      printed_grid << "#{idx} " + row.join(" ")
+    # originally used tty-box gem to draw the box, but it doesn't allow colorized text to be passed into it
+    left_border = "║  "
+    right_border = "  ║"
+    corners = ["╔","╗","╚","╝"]
+    top_border = "═" * (@size*2 - 8)
+    bottom_border = "═" * (@size * 2 + 3)
+    puts corners[0] + "MINESWEEPER" + top_border + corners[1]
+    @grid.each_with_index do |row|
+      puts left_border + "#{row.join(" ")}" + right_border
     end
-    return printed_grid.join("\n")
+    puts corners[2] + bottom_border + corners[3]
   end
 
   def [](pos)

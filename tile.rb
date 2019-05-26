@@ -2,13 +2,14 @@ class Tile
 
   attr_reader :revealed, :value, :neighbors, :bombed
 
-  def initialize(pos,bombs)
+  def initialize(pos,bombs,board_size)
     @pos = pos
     @bombs = bombs
     @flagged = false
     @revealed = false
     @bombed = @bombs.include?(@pos)
     @neighbors = [] # row, col coordinates of non-bombed neigbours
+    @size = board_size
     set_value
   end
 
@@ -44,7 +45,7 @@ class Tile
         col += j
         if @bombs.include?([row, col])
           adjacent_bombs_num += 1
-        elsif (0...9).include?(row) && (0...9).include?(col)
+        elsif (0...@size).include?(row) && (0...@size).include?(col)
           @neighbors << [row, col]
         end
       end
@@ -59,14 +60,14 @@ class Tile
   def to_s
     if @revealed
       if @bombed
-        @value
+        @value.colorize(:light_red)
       elsif !self.empty?
-        @value
+        @value.colorize(:light_magenta)
       else
         @value
       end
     elsif @flagged
-      "^"
+      "\u2022".colorize(:light_yellow)
     else
       "*"
     end

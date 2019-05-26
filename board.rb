@@ -2,8 +2,6 @@ require_relative './tile.rb'
 
 class Board
 
-  attr_reader :grid, :bombs, :size, :game_over
-
   def initialize
     @size = 15
     @grid = Array.new(@size) {Array.new(@size)}
@@ -39,9 +37,9 @@ class Board
     left_border = "║  "
     right_border = "  ║"
     corners = ["╔","╗","╚","╝"]
-    top_border = "═" * (@size*2 - 8)
+    top_border = "═" * (@size*2 - 10) # accounts for corners and title length
     bottom_border = "═" * (@size * 2 + 3)
-    puts corners[0] + "MINESWEEPER" + top_border + corners[1]
+    puts corners[0] + " MINESWEEPER " + top_border + corners[1]
     @grid.each_with_index do |row|
       puts left_border + "#{row.join(" ")}" + right_border
     end

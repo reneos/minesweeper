@@ -1,13 +1,11 @@
 require_relative './board.rb'
-require 'pry'
 require 'tty-cursor'
 require 'tty-prompt'
 require 'colorize'
+require 'yaml'
 
 
 class Game
-
-  attr_reader :board
 
   def initialize
     @board = Board.new
@@ -20,13 +18,18 @@ class Game
       system("clear")
       # print_box(@board.print_grid)
       @board.print_grid
-      print "Move around with arrow keys. Enter to flip tile, tab to flag tile."
+      puts "Move around with arrow keys"
+      puts "Press return to flip tile, tab to flag tile."
+      puts "Press 's' to save and exit. Press 'l' to load saved game."
       mode, pos = self.prompt(cursor_pos)
       cursor_pos = pos
       if mode == "r"
         @board.reveal(pos)
-      else
+      elsif mode == "f"
         @board.flag_tile(pos)
+      elsif mode == "l"
+        @board = YAML::load_file('save.yml')
+        print "File loaded."
       end
     end
     game_over_message
@@ -68,10 +71,20 @@ class Game
           return "r", [row,col]
         elsif key == :tab
           return "f", [row,col]
+        elsif event.value == "s"
+          File.open('save.yml','w') {|file| file.write(@board.to_yaml)}
+          system("clear")
+          print @cursor.move_to(0,0)
+          puts "Game saved.".colorize(:red)
+          exit
+        elsif event.value == "l"
+          return "l", [row,col]
         end
       end
 
       prompt.on(:keyescape) do |event|
+        system("clear")
+        print @cursor.move_to(0,0)
         exit
       end
 
@@ -83,6 +96,3 @@ end
 
 game = Game.new
 game.run
-
-
-pry

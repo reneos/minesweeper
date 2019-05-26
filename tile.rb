@@ -59,12 +59,14 @@ class Tile
 
   def to_s
     if @revealed
-      if @bombed
+      if @bombed && @flagged
+        @value.colorize(:light_blue)
+      elsif @bombed
         @value.colorize(:light_red)
       elsif !self.empty?
         @value.colorize(:light_magenta)
       else
-        @value
+        @value.colorize(:light_white)
       end
     elsif @flagged
       "\u2022".colorize(:light_yellow)

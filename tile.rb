@@ -71,7 +71,7 @@ class Tile
     elsif @flagged
       "\u2022".colorize(:light_yellow)
     else
-      "*"
+      ".".colorize(:light_black)
     end
   end
 

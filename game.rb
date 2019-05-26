@@ -12,27 +12,40 @@ class Game
   end
 
   def run
+
     @cursor = TTY::Cursor
     cursor_pos = [0,0]
+
     until @board.game_over
       system("clear")
-      # print_box(@board.print_grid)
       @board.print_grid
-      puts "Move around with arrow keys"
-      puts "Press return to flip tile, tab to flag tile."
-      puts "Press 's' to save and exit. Press 'l' to load saved game."
+      print_instructions
       mode, pos = self.prompt(cursor_pos)
-      cursor_pos = pos
+      cursor_pos = pos # save the cursor position
       if mode == "r"
         @board.reveal(pos)
       elsif mode == "f"
         @board.flag_tile(pos)
       elsif mode == "l"
         @board = YAML::load_file('save.yml')
-        print "File loaded."
+        puts "Loading saved game."
+        sleep(2)
       end
     end
     game_over_message
+  end
+
+  def print_instructions
+    s = "s".colorize(:blue)
+    l = "l".colorize(:blue)
+    enter_key = "return".colorize(:blue)
+    arrows = "arrow keys".colorize(:blue)
+    tab = "tab".colorize(:blue)
+    escape = "escape".colorize(:blue)
+    puts "Move around with #{arrows}."
+    puts "Press #{enter_key} to flip tile, #{tab} to flag or unflag a tile."
+    puts "Press #{s} to save and exit. Press #{l} to load saved game."
+    puts "Press #{escape} to quit."
   end
 
   def game_over_message
@@ -44,6 +57,13 @@ class Game
     end
     @board.reveal_board
     puts message
+  end
+
+  def save_game
+    File.open('save.yml','w') {|file| file.write(@board.to_yaml)}
+    system("clear")
+    print @cursor.move_to(0,0)
+    puts "Game saved. Exited game.".colorize(:red)
   end
 
   def prompt(current_pos)
@@ -72,20 +92,16 @@ class Game
         elsif key == :tab
           return "f", [row,col]
         elsif event.value == "s"
-          File.open('save.yml','w') {|file| file.write(@board.to_yaml)}
-          system("clear")
-          print @cursor.move_to(0,0)
-          puts "Game saved.".colorize(:red)
+          save_game
           exit
         elsif event.value == "l"
           return "l", [row,col]
+        elsif key == :escape
+          system("clear")
+          print @cursor.move_to(0,0)
+          puts "Exited game."
+          exit
         end
-      end
-
-      prompt.on(:keyescape) do |event|
-        system("clear")
-        print @cursor.move_to(0,0)
-        exit
       end
 
       prompt.read_keypress

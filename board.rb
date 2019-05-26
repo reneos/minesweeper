@@ -3,13 +3,12 @@ require_relative './tile.rb'
 class Board
 
   def initialize
-    @size = 15
+    @size = 20
     @grid = Array.new(@size) {Array.new(@size)}
     @bombs = []
     @lose = false
     fill_in_bombs
     fill_in_tiles
-    print_grid
   end
 
   def fill_in_bombs

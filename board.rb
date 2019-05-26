@@ -35,7 +35,12 @@ class Board
   end
 
   def print_grid
-    @grid.each {|row| puts row.join(" ") }
+    printed_grid = []
+    printed_grid << "  " + (0...9).to_a.join(" ")
+    @grid.each_with_index do |row, idx|
+      printed_grid << "#{idx} " + row.join(" ")
+    end
+    return printed_grid.join("\n")
   end
 
   def [](pos)
@@ -49,6 +54,10 @@ class Board
       neighbor_tile.reveal
       cascade(neighbor_tile) if neighbor_tile.empty? # only flip neighbors of "empty" tiles
     end
+  end
+
+  def flag_tile(pos)
+    self[pos].flag
   end
 
   def reveal(pos)

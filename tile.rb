@@ -59,16 +59,16 @@ class Tile
   def to_s
     if @revealed
       if @bombed
-        @value.colorize(:red)
+        @value
       elsif !self.empty?
-        @value.colorize(:light_blue)
+        @value
       else
         @value
       end
     elsif @flagged
       "^"
     else
-      @value
+      "*"
     end
   end
 

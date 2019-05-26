@@ -1,6 +1,8 @@
 require_relative './board.rb'
-require 'colorize'
 require 'pry'
+require 'tty'
+require 'remedy'
+include Remedy
 
 class Game
 
@@ -10,27 +12,79 @@ class Game
     @board = Board.new
   end
 
+  def print_box(contents)
+    box = TTY::Box.frame(
+      width: 25,
+      height: 12,
+      title: {top_left: 'MINESWEEPER'},
+      border: :thick,
+      align: :center) do
+        contents
+      end
+    puts box
+  end
+
   def run
+    @cursor = TTY::Cursor
     until @board.game_over
-      pos = self.prompt
-      @board.reveal(pos)
-      @board.print_grid
+      system("clear")
+      print_box(@board.print_grid)
+      mode, pos = self.prompt
+      if mode == "r"
+        @board.reveal(pos)
+      else
+        @board.flag_tile(pos)
+      end
     end
+    game_over_message
+  end
+
+  def game_over_message
+    system("clear")
     if @board.win?
-      puts "You win!"
+      message = "You win!"
     else
-      puts "You lose!"
+      message = "You lose!"
     end
-    @board.reveal_board
+    print_box(@board.reveal_board)
+    puts message
   end
 
   def prompt
-    input = ""
-    until input.length == 2 && input.all? {|ele| ele < @board.size}
-      print "Enter a coordinate in row, col format: "
-      input = gets.chomp.split(",").map(&:to_i)
+    print @cursor.show
+    print @cursor.move_to(5,2)
+    row = 0
+    col = 0
+    while true
+      prompt = TTY::Prompt::new(interrupt: :exit)
+      prompt.on(:keypress) do |event|
+        key = event.key.name
+        print @cursor.save
+        if key == :down
+          print @cursor.down(1)
+          row += 1
+        elsif key == :up
+          print @cursor.up(1)
+          row -= 1
+        elsif key == :left
+          print @cursor.backward(2)
+          col -= 1
+        elsif key == :right
+          print @cursor.forward(2)
+          col += 1
+        elsif key == :return
+          return "r", [row,col]
+        elsif key == :tab
+          return "f", [row,col]
+        end
+      end
+
+      prompt.on(:keyescape) do |event|
+        exit
+      end
+
+      prompt.read_keypress
     end
-    input
   end
 
 end
